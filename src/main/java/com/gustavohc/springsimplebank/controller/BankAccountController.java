@@ -1,6 +1,7 @@
 package com.gustavohc.springsimplebank.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gustavohc.springsimplebank.dto.BankAccountCreateRequest;
 import com.gustavohc.springsimplebank.dto.BankAccountDetailsResponse;
+import com.gustavohc.springsimplebank.dto.BankTransactionDetailsResponse;
 import com.gustavohc.springsimplebank.model.BankAccount;
 import com.gustavohc.springsimplebank.service.BankAccountService;
 
@@ -83,7 +85,12 @@ public class BankAccountController {
 
         if(accountOptional.isPresent()) {
             var account = accountOptional.get();
-            throw new Exception("Implement get transations for a bank account");
+            
+            return ResponseEntity.ok().body(
+                account.getTransactions().stream()
+                                         .map(t -> new BankTransactionDetailsResponse(t.getId().toString(), accountNumber, t.getType().toString(), t.getAmount(), t.getTimestamp()))
+                                         .collect(Collectors.toList())
+                );
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found");
