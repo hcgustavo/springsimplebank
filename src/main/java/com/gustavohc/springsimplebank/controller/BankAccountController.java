@@ -31,68 +31,40 @@ public class BankAccountController {
 
     @PostMapping
     public ResponseEntity<BankAccountDetailsResponse> createBankAccount(@RequestBody BankAccountCreateRequest request) {
-        try {
-            BankAccount result = bankAccountService.createAccount(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new BankAccountDetailsResponse(result.getNumber(), result.getHolderName(), result.getBalance()));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+
+        BankAccount result = bankAccountService.createAccount(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new BankAccountDetailsResponse(result.getNumber(), result.getHolderName(), result.getBalance()));
     }
 
     @DeleteMapping("/{accountNumber}")
     public ResponseEntity<String> closeBankAccount(@PathVariable String accountNumber) {
 
-        var accountOptional = bankAccountService.findByAccountNumber(accountNumber);
-
-        if(accountOptional.isPresent()) {
-            bankAccountService.closeAccount(accountOptional.get());
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        }
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        bankAccountService.closeAccount(accountNumber);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @GetMapping("/{accountNumber}")
-    public ResponseEntity<?> getDetails(@PathVariable String accountNumber) {
+    public ResponseEntity<BankAccountDetailsResponse> getDetails(@PathVariable String accountNumber) {
 
-        var accountOptional = bankAccountService.findByAccountNumber(accountNumber);
-
-        if(accountOptional.isPresent()) {
-            var account = accountOptional.get();
-            return ResponseEntity.ok().body(new BankAccountDetailsResponse(account.getNumber(), account.getHolderName(), account.getBalance()));
-        }
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found");
+        var bankAccount = bankAccountService.findByAccountNumber(accountNumber);
+        return ResponseEntity.ok().body(new BankAccountDetailsResponse(bankAccount.getNumber(), bankAccount.getHolderName(), bankAccount.getBalance()));
     }
 
     @GetMapping("/{accountNumber}/balance")
     public ResponseEntity<String> getBalance(@PathVariable String accountNumber) {
 
-        var accountOptional = bankAccountService.findByAccountNumber(accountNumber);
-
-        if(accountOptional.isPresent()) {
-            var account = accountOptional.get();
-            return ResponseEntity.ok().body(account.getBalance().toString());
-        }
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found");
+        var bankAccount = bankAccountService.findByAccountNumber(accountNumber);
+        return ResponseEntity.ok().body(bankAccount.getBalance().toString());
     }
 
     @GetMapping("/{accountNumber}/transactions")
-    public ResponseEntity<?> getTransactions(@PathVariable String accountNumber) throws Exception {
+    public ResponseEntity<List<BankTransactionDetailsResponse>> getTransactions(@PathVariable String accountNumber) {
 
-        var accountOptional = bankAccountService.findByAccountNumber(accountNumber);
-
-        if(accountOptional.isPresent()) {
-            var account = accountOptional.get();
-            
-            return ResponseEntity.ok().body(
-                account.getTransactions().stream()
+        var bankAccount = bankAccountService.findByAccountNumber(accountNumber);
+        return ResponseEntity.ok().body(
+            bankAccount.getTransactions().stream()
                                          .map(t -> new BankTransactionDetailsResponse(t.getId().toString(), accountNumber, t.getType().toString(), t.getAmount(), t.getTimestamp()))
                                          .collect(Collectors.toList())
                 );
-        }
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found");
     }
 }

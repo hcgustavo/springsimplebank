@@ -1,6 +1,7 @@
 package com.gustavohc.springsimplebank.model;
 
 import java.util.List;
+import java.util.Random;
 
 import org.hibernate.annotations.Check;
 
@@ -40,9 +41,18 @@ public class BankAccount {
     private List<BankTransaction> transactions;
 
     @PrePersist
-    private void setDefaultBalance() {
+    private void onPersist() {
+        Random random = new Random();
+        StringBuilder result = new StringBuilder();
+
         if(balance == null) {
             balance = 0.0;
         }
+
+        for(int i = 0; i < 8; i++) {
+            result.append(random.nextInt(10));
+        }
+
+        number = result.toString();
     }
 }

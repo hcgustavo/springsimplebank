@@ -1,17 +1,18 @@
 package com.gustavohc.springsimplebank.service;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
 import com.gustavohc.springsimplebank.dto.BankAccountCreateRequest;
+import com.gustavohc.springsimplebank.exception.BankAccountConstraintViolationException;
+import com.gustavohc.springsimplebank.exception.BankAccountNotFoundException;
 import com.gustavohc.springsimplebank.model.BankAccount;
 import com.gustavohc.springsimplebank.repository.BankAccountRepository;
 
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 
 @Service
@@ -30,33 +31,28 @@ public class BankAccountService {
         var bankAccount = new BankAccount();
         bankAccount.setHolderName(request.holderName());
         bankAccount.setBalance(request.balance());
-        bankAccount.setNumber(generateAccountNumber());
 
         Set<ConstraintViolation<BankAccount>> violations = validator.validate(bankAccount);
         if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
+            List<String> violationsMessages = violations.stream().map(v -> v.getMessage()).toList();
+            throw new BankAccountConstraintViolationException("Could not create account due to constraint violations: " + violationsMessages.toString());
         }
 
         return bankAccountRepository.save(bankAccount);
     }
 
-    public void closeAccount(BankAccount account) {
-        bankAccountRepository.delete(account);
+    public void closeAccount(String accountNumber) {
+        var bankAccount = findByAccountNumber(accountNumber);
+        bankAccountRepository.delete(bankAccount);
     }
 
-    public Optional<BankAccount> findByAccountNumber(String accountNumber) {
-        return bankAccountRepository.findById(accountNumber);
-    }
-
-    private String generateAccountNumber() {
-        Random random = new Random();
-        StringBuilder result = new StringBuilder();
-
-        for(int i = 0; i < 8; i++) {
-            result.append(random.nextInt(10));
+    public BankAccount findByAccountNumber(String accountNumber) {
+        var bankAccount = bankAccountRepository.findById(accountNumber);
+        if(bankAccount.isPresent()) {
+            return bankAccount.get();
         }
 
-        return result.toString();
+        throw new BankAccountNotFoundException("Account not found: " + accountNumber);
     }
 
 }
