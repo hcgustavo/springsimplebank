@@ -1,5 +1,7 @@
 package com.gustavohc.springsimplebank.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gustavohc.springsimplebank.dto.BankAccountCreateRequest;
-import com.gustavohc.springsimplebank.dto.BankAccountCreateResponse;
+import com.gustavohc.springsimplebank.dto.BankAccountDetailsResponse;
 import com.gustavohc.springsimplebank.model.BankAccount;
 import com.gustavohc.springsimplebank.service.BankAccountService;
 
@@ -26,10 +28,10 @@ public class BankAccountController {
     }
 
     @PostMapping
-    public ResponseEntity<BankAccountCreateResponse> createBankAccount(@RequestBody BankAccountCreateRequest request) {
+    public ResponseEntity<BankAccountDetailsResponse> createBankAccount(@RequestBody BankAccountCreateRequest request) {
         try {
             BankAccount result = bankAccountService.createAccount(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new BankAccountCreateResponse(result.getNumber(), result.getHolderName(), result.getBalance()));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new BankAccountDetailsResponse(result.getNumber(), result.getHolderName(), result.getBalance()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
@@ -38,13 +40,52 @@ public class BankAccountController {
     @DeleteMapping("/{accountNumber}")
     public ResponseEntity<String> closeBankAccount(@PathVariable String accountNumber) {
 
-        var account = bankAccountService.findByAccountNumber(accountNumber);
+        var accountOptional = bankAccountService.findByAccountNumber(accountNumber);
 
-        if(account.isPresent()) {
-            bankAccountService.closeAccount(account.get());
+        if(accountOptional.isPresent()) {
+            bankAccountService.closeAccount(accountOptional.get());
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    @GetMapping("/{accountNumber}")
+    public ResponseEntity<?> getDetails(@PathVariable String accountNumber) {
+
+        var accountOptional = bankAccountService.findByAccountNumber(accountNumber);
+
+        if(accountOptional.isPresent()) {
+            var account = accountOptional.get();
+            return ResponseEntity.ok().body(new BankAccountDetailsResponse(account.getNumber(), account.getHolderName(), account.getBalance()));
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found");
+    }
+
+    @GetMapping("/{accountNumber}/balance")
+    public ResponseEntity<String> getBalance(@PathVariable String accountNumber) {
+
+        var accountOptional = bankAccountService.findByAccountNumber(accountNumber);
+
+        if(accountOptional.isPresent()) {
+            var account = accountOptional.get();
+            return ResponseEntity.ok().body(account.getBalance().toString());
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found");
+    }
+
+    @GetMapping("/{accountNumber}/transactions")
+    public ResponseEntity<?> getTransactions(@PathVariable String accountNumber) throws Exception {
+
+        var accountOptional = bankAccountService.findByAccountNumber(accountNumber);
+
+        if(accountOptional.isPresent()) {
+            var account = accountOptional.get();
+            throw new Exception("Implement get transations for a bank account");
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found");
     }
 }
