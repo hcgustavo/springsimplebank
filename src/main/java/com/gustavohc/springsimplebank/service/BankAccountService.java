@@ -2,6 +2,7 @@ package com.gustavohc.springsimplebank.service;
 
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
@@ -9,13 +10,20 @@ import com.gustavohc.springsimplebank.dto.BankAccountCreateRequest;
 import com.gustavohc.springsimplebank.model.BankAccount;
 import com.gustavohc.springsimplebank.repository.BankAccountRepository;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
+
 @Service
 public class BankAccountService {
 
     private BankAccountRepository bankAccountRepository;
 
-    public BankAccountService(BankAccountRepository bankAccountRepository) {
+    private Validator validator;
+
+    public BankAccountService(BankAccountRepository bankAccountRepository, Validator validator) {
         this.bankAccountRepository = bankAccountRepository;
+        this.validator = validator;
     }
 
     public BankAccount createAccount(BankAccountCreateRequest request) {
@@ -23,6 +31,12 @@ public class BankAccountService {
         bankAccount.setHolderName(request.holderName());
         bankAccount.setBalance(request.balance());
         bankAccount.setNumber(generateAccountNumber());
+
+        Set<ConstraintViolation<BankAccount>> violations = validator.validate(bankAccount);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+
         return bankAccountRepository.save(bankAccount);
     }
 

@@ -15,8 +15,6 @@ import com.gustavohc.springsimplebank.dto.BankAccountCreateResponse;
 import com.gustavohc.springsimplebank.model.BankAccount;
 import com.gustavohc.springsimplebank.service.BankAccountService;
 
-import jakarta.websocket.server.PathParam;
-
 @RestController
 @RequestMapping("/accounts")
 public class BankAccountController {
