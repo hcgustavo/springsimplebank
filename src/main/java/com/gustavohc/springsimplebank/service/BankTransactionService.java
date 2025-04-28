@@ -5,6 +5,9 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 
 import com.gustavohc.springsimplebank.dto.BankTransactionCreateRequest;
+import com.gustavohc.springsimplebank.exception.BankAccountInvalidBalanceException;
+import com.gustavohc.springsimplebank.exception.BankAccountNotFoundException;
+import com.gustavohc.springsimplebank.exception.BankTransactionInvalidAmountException;
 import com.gustavohc.springsimplebank.model.BankAccount;
 import com.gustavohc.springsimplebank.model.BankTransaction;
 import com.gustavohc.springsimplebank.model.TransactionType;
@@ -25,16 +28,16 @@ public class BankTransactionService {
     }
 
     @Transactional
-    public BankTransaction createTransaction(BankTransactionCreateRequest request, TransactionType type) throws Exception {
+    public BankTransaction createTransaction(BankTransactionCreateRequest request, TransactionType type) {
         var bankAccountOptional = bankAccountRepository.findById(request.accountNumber());
         BankAccount bankAccount = null;
 
         if(!bankAccountOptional.isPresent()) {
-            throw new Exception("Bank account does not exist: " + request.accountNumber());
+            throw new BankAccountNotFoundException("Account not found: " + request.accountNumber());
         }
 
         if(request.amount() < 0) {
-            throw new Exception("Amounts for bank transactions should be positive. Received: " + request.amount());
+            throw new BankTransactionInvalidAmountException("Amount for bank transactions should be positive. Received: " + request.amount());
         }
 
         bankAccount = bankAccountOptional.get();
@@ -53,7 +56,7 @@ public class BankTransactionService {
         }
 
         if(bankAccount.getBalance() < 0) {
-            throw new Exception("Operation not allowed because account balance would be negative");
+            throw new BankAccountInvalidBalanceException("Operation not allowed because account balance would be negative");
         }
 
         bankAccountRepository.save(bankAccount);

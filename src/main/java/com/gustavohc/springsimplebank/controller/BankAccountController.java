@@ -64,7 +64,6 @@ public class BankAccountController {
         return ResponseEntity.ok().body(
             bankAccount.getTransactions().stream()
                                          .map(t -> new BankTransactionDetailsResponse(t.getId().toString(), accountNumber, t.getType().toString(), t.getAmount(), t.getTimestamp()))
-                                         .collect(Collectors.toList())
-                );
+                                         .collect(Collectors.toList()));
     }
 }

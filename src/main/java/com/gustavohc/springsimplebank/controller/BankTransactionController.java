@@ -24,21 +24,13 @@ public class BankTransactionController {
 
     @PostMapping("/deposit")
     public ResponseEntity<?> createDeposit(@RequestBody BankTransactionCreateRequest request) {
-        try {
-            var bankTransaction = bankTransactionService.createTransaction(request, TransactionType.DEPOSIT);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new BankTransactionDetailsResponse(bankTransaction.getId().toString(), request.accountNumber(), TransactionType.DEPOSIT.toString(), request.amount(), bankTransaction.getTimestamp()));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        var bankTransaction = bankTransactionService.createTransaction(request, TransactionType.DEPOSIT);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new BankTransactionDetailsResponse(bankTransaction.getId().toString(), request.accountNumber(), TransactionType.DEPOSIT.toString(), request.amount(), bankTransaction.getTimestamp()));
     }
 
     @PostMapping("/withdraw")
     public ResponseEntity<?> createWithdraw(@RequestBody BankTransactionCreateRequest request) {
-        try {
-            var bankTransaction = bankTransactionService.createTransaction(request, TransactionType.WITHDRAWAL);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new BankTransactionDetailsResponse(bankTransaction.getId().toString(), request.accountNumber(), TransactionType.WITHDRAWAL.toString(), request.amount(), bankTransaction.getTimestamp()));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        var bankTransaction = bankTransactionService.createTransaction(request, TransactionType.WITHDRAWAL);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new BankTransactionDetailsResponse(bankTransaction.getId().toString(), request.accountNumber(), TransactionType.WITHDRAWAL.toString(), request.amount(), bankTransaction.getTimestamp()));
     }
 }
