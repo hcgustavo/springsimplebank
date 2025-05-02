@@ -13,8 +13,6 @@ import com.gustavohc.springsimplebank.exception.BankAccountNotFoundException;
 import com.gustavohc.springsimplebank.model.BankAccount;
 import com.gustavohc.springsimplebank.repository.BankAccountRepository;
 
-import jakarta.validation.Validator;
-
 import static org.mockito.BDDMockito.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;;
@@ -23,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;;
 public class BankAccountServiceTest {
 
     @Mock BankAccountRepository bankAccountRepository;
-    @Mock  Validator validator;
     @InjectMocks BankAccountService bankAccountService;
 
     @Test
