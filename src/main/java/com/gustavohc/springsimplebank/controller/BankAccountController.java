@@ -19,6 +19,8 @@ import com.gustavohc.springsimplebank.dto.BankTransactionDetailsResponse;
 import com.gustavohc.springsimplebank.model.BankAccount;
 import com.gustavohc.springsimplebank.service.BankAccountService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/accounts")
 public class BankAccountController {
@@ -30,7 +32,7 @@ public class BankAccountController {
     }
 
     @PostMapping
-    public ResponseEntity<BankAccountDetailsResponse> createBankAccount(@RequestBody BankAccountCreateRequest request) {
+    public ResponseEntity<BankAccountDetailsResponse> createBankAccount(@RequestBody @Valid BankAccountCreateRequest request) {
 
         BankAccount result = bankAccountService.createAccount(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(new BankAccountDetailsResponse(result.getNumber(), result.getHolderName(), result.getBalance()));
