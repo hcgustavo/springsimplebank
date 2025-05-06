@@ -26,4 +26,11 @@ public class TransactionTypeTest {
                 .hasMessageContaining("Invalid TransactionType: invalidString");
     }
 
+    @Test
+    @DisplayName("Should return correct type for each enum")
+    void getStringShouldReturnCorrectType() {
+        assertThat(TransactionType.DEPOSIT.getType()).isEqualTo("deposit");
+        assertThat(TransactionType.WITHDRAWAL.getType()).isEqualTo("withdrawal");
+    }
+
 }
